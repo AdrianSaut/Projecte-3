@@ -192,20 +192,13 @@ if ($tipus == '1') {
 } elseif ($tipus == '3') {
   if ($paraula != "" && $t == "1") {
 
-    // $connection = new MongoDB\Driver\Manager("mongodb://localhost:27017");
-    // $filtro = ['paraulaProhibida.paraula' => "'".$paraula."'"];
-    // $opcions = [];
-    // $query = new MongoDB\Driver\Query($filtro, $opcions);
-    // $result = $connection->executeQuery('db.paraulesDites', $query);
-    // $msg = "";
-    // foreach ($result as $document) {
-    //   $msg = "<p class='text-danger'> La paraula <span class='font-weight-bold'>" . $paraula . "</span> l'ha dits <span class='font-weight-bold'>" . $document->nomEmisor . "</span> el <span class='font-weight-bold'>" . $document->dataHora . "</span></p>";
-    // }
-
-    $sql = "SELECT * FROM DEL_paraula_usuari INNER JOIN DEL_usuaris ON DEL_usuaris.id = DEL_paraula_usuari.id_usuari_emiso WHERE paraula = '$paraula'";
-
-    $result = $con->query($sql);
-    if ($result->num_rows > 0) {
+    $connection = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+    $filtro = array('paraulaProhibida.paraula' => $paraula);
+    $opcions = [];
+    $query = new MongoDB\Driver\Query($filtro, $opcions);
+    $result = $connection->executeQuery('chatEmpresa.paraulesDites', $query);
+    $msg = "";
+    if ($result != null) {
       $msg = "<table class='table table-striped table-bordered table-hover m-3'>" .
         "<thead class='thead-dark'>" .
         "<tr>" .
@@ -215,24 +208,53 @@ if ($tipus == '1') {
         "</tr>" .
         "</thead>" .
         "<tbody>";
-      while ($row = $result->fetch_assoc()) {
-        $id_usuari  = $row['id_usuari_emiso'];
-        $usuari     = $row['nom'];
-        $dni        = $row['dni'];
-        $id_paraula = $row['id_paraula'];
-        $paraula    = $row['paraula'];
-        $datahora   = $row['data_hora'];
+      foreach ($result as $document) {
+
         $msg .= "<tr>" .
-          "<td>" . $id_usuari . " - " . $usuari . " </br> " . $dni . "</td>" .
-          "<td>" . $id_paraula . " - " . $paraula . "</td>" .
-          "<td>" . $datahora . "</td>" .
+          "<td>" .  $document->emisor->id_emisor . " - " .  $document->emisor->nomEmisor . " </td>" .
+          "<td>" . $document->paraulaProhibida->id_paraula . " - " . $paraula . "</td>" .
+          "<td>" . $document->dataHora . "</td>" .
           "</tr>";
+        // $msg = "<p class='text-danger'> La paraula <span class='font-weight-bold'>" . $paraula . "</span> l'ha dits <span class='font-weight-bold'>" . $document->emisor->nomEmisor . "</span> el <span class='font-weight-bold'>" . $document->dataHora . "</span></p>";
       }
       $msg .= "</tbody>" .
-        "</table>";
-    } else {
+      "</table>";
+      
+    }else{
       $msg = "<p class='text-danger'> Ningú ha dit <span class='font-weight-bold'>" . $paraula . "</span>. </p>";
     }
+
+    // $sql = "SELECT * FROM DEL_paraula_usuari INNER JOIN DEL_usuaris ON DEL_usuaris.id = DEL_paraula_usuari.id_usuari_emiso WHERE paraula = '$paraula'";
+
+    // $result = $con->query($sql);
+    // if ($result->num_rows > 0) {
+    // $msg = "<table class='table table-striped table-bordered table-hover m-3'>" .
+    //     "<thead class='thead-dark'>" .
+    //     "<tr>" .
+    //     "<th>Usuari</th>" .
+    //     "<th>Paraula</th>" .
+    //     "<th>Data i hora</th>" .
+    //     "</tr>" .
+    //     "</thead>" .
+    //     "<tbody>";
+    //   while ($row = $result->fetch_assoc()) {
+    //     $id_usuari  = $row['id_usuari_emiso'];
+    //     $usuari     = $row['nom'];
+    //     $dni        = $row['dni'];
+    //     $id_paraula = $row['id_paraula'];
+    //     $paraula    = $row['paraula'];
+    //     $datahora   = $row['data_hora'];
+    //     $msg .= "<tr>" .
+    //       "<td>" . $id_usuari . " - " . $usuari . " </br> " . $dni . "</td>" .
+    //       "<td>" . $id_paraula . " - " . $paraula . "</td>" .
+    //       "<td>" . $datahora . "</td>" .
+    //       "</tr>";
+    //   }
+    //   $msg .= "</tbody>" .
+    //     "</table>";
+    // } else {
+    //   $msg = "<p class='text-danger'> Ningú ha dit <span class='font-weight-bold'>" . $paraula . "</span>. </p>";
+    // }
   } else if ($usuari != "" && $t == "2") {
     $sql = "SELECT * FROM DEL_paraula_usuari INNER JOIN DEL_usuaris ON DEL_usuaris.id = DEL_paraula_usuari.id_usuari_emiso WHERE DEL_usuaris.dni = '$usuari'";
 
